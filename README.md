@@ -1,4 +1,4 @@
-# SwasthiQ Pharmacy CRM
+# EMR Feature
 
 A simplified Pharmacy Module with Dashboard and Inventory management built with **FastAPI** (Python) backend and **React** frontend.
 
