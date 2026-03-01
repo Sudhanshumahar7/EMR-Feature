@@ -20,8 +20,6 @@ A simplified Pharmacy Module with Dashboard and Inventory management built with 
 ```
 EMR-feature/
 ├── backend/
-│    ├── _pycache_./
-│    ├── venv/
 │    ├── main.py          # FastAPI app with all endpoints
 │    ├── requirements.txt
 │    └── pharmacy.db      # Auto-created SQLite database
@@ -37,12 +35,10 @@ EMR-feature/
 │    │   │   └── Inventory.js
 │    │   ├── App.js
 │    │   ├── App.css
-│    │   ├── index.css
 │    │   └── index.js
 │    ├── .gitignore
 │    ├── package-lock.json
 │    └── package.json
-└── README.md
 
 ```
 
