@@ -1,10 +1,10 @@
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import Optional, List
+from typing import Optional
 from datetime import date, datetime
 import sqlite3
-import json
+import uvicorn
 import os
 
 app = FastAPI(title="SwasthiQ Pharmacy API", version="1.0.0")
@@ -71,7 +71,6 @@ def init_db():
         )
     """)
 
-    # Seed data if empty
     c.execute("SELECT COUNT(*) FROM medicines")
     if c.fetchone()[0] == 0:
         medicines = [
@@ -174,12 +173,13 @@ def get_sales_summary():
 
 @app.get("/api/dashboard/items-sold")
 def get_items_sold():
-    with get_db() as conn:
-        c = conn.cursor()
-        today = date.today().isoformat()
-        c.execute("SELECT COALESCE(SUM(items_count), 0) as total FROM sales WHERE sale_date = ?", (today,))
-        row = c.fetchone()
-        return {"items_sold_today": row["total"]}
+    conn = get_db()
+    c = conn.cursor()
+    today = date.today().isoformat()
+    c.execute("SELECT COALESCE(SUM(items_count), 0) as total FROM sales WHERE sale_date = ?", (today,))
+    row = c.fetchone()
+    conn.close()
+    return {"items_sold_today": row["total"]}
 
 @app.get("/api/dashboard/low-stock")
 def get_low_stock():
@@ -277,12 +277,12 @@ def update_medicine(medicine_id: int, medicine: MedicineUpdate):
     if not c.fetchone():
         conn.close()
         raise HTTPException(status_code=404, detail="Medicine not found")
-    
+
     updates = {k: v for k, v in medicine.dict().items() if v is not None}
     if not updates:
         conn.close()
         raise HTTPException(status_code=400, detail="No fields to update")
-    
+
     set_clause = ", ".join([f"{k} = ?" for k in updates.keys()])
     values = list(updates.values()) + [medicine_id]
     c.execute(f"UPDATE medicines SET {set_clause} WHERE id = ?", values)
@@ -322,3 +322,6 @@ def delete_medicine(medicine_id: int):
 @app.get("/")
 def root():
     return {"message": "SwasthiQ Pharmacy API is running", "docs": "/docs"}
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=int(os.environ.get("PORT", 8000)))
